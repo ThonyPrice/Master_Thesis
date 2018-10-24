@@ -111,7 +111,43 @@ Text...
 \chapter{Methods}
 
 \section{Data}
-Text...
+
+The data is collected by Steady Health during a 4,5 month pilot study including 20 patients.
+All patients are at least 18 years old and have been injecting insulin at least 1 year prior to the study.
+
+Each patient are equipped with a CGM sensor for the entirety of the study.
+The data i collected at intervals of 1-5 minutes.
+
+
+\medskip
+\begin{table}[h]
+\begin{center}
+  \begin{tabular}{lll}
+  \textbf{
+  Notation &
+  Field &
+  Format \\
+  }
+  \hline
+  $P$ &
+  Patient &
+  Integer \\
+  $t$ &
+  time &
+  $YYMMDD:HHMMSS$ \\
+  $t_{BG}$ &
+  Glucose value at $t$ &
+  Float \\
+  $t_{ACT}$ &
+  Physical activity at $t$ &
+  Integer \\
+  \hline
+  \end{tabular}
+  \caption[]
+  {\small Caption.}
+  \label{table:data_description}
+\end{center}
+\end{table}
 
 \section{Implementation}
 Text...
