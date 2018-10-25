@@ -30,17 +30,42 @@ Figure \ref{fig:wavelet_example} displays an example of wavelet filtering applie
 
 \subsection{Qualitative Representation}
 
-To identify events in the denoised CGM data feature extraction is used.
+To identify events in the denoised CGM data feature, extraction is used.
 Feature extraction can be acheived by either a qualitative or quantitative method.
 The qualitative method offer benefits such as more transparent reasoning and ability to provide explanations for for solutions provided \parencite{Ven2003}.
 
-Triangular representation...
+In qulitative representation by triangular shapes, a CGM data segment can take seven shape variables.
+Figure \ref{fig:shapes} shows the different shapes.
+Each is a unique combination of the first and second order derivaive on the curve of the current segment.
+The derivates can be read from segment adjecent points allowing a CGM data series to be presented as a sequence of shapes describing fluctuations in BG concentration.
 
-Membership degree...
+\input{images/shapes}
+
+\subsection{Event Detection}
+
+With the qualitative representation event detection can be performad by analysing the sequence of shapes.
+In figure \ref{fig:curve2shape} an event could be triggered by identifying a continously accelerating increase (4 D's in a row from timestep 12).
+
+\input{images/curve2shape}
+
+The detection algorithm could be [INSERT SMART ALG HERE].
 
 \subsection{Intervention Analysis}
 
-Detect event with impact on trend average.
+Intervention analysis provides a tool to asses how much a given even has changes the series (if at all) \parencite{box2015time}.
+The analysis is able to detect 4 patterns:
+
+\begin{enumerate}
+  \item Permanent constant change to the mean level.
+  \item Brief constant change to the mean level.
+  \item Gradual increase or decrase to a new mean level.
+  \item Initial change followed by gradual return to previous mean level.
+\end{enumerate}
+
+[INSERT INSTERVENTION ANALYSIS MATH HERE]
+
+Because changes in mean BG concentration are subtle and changes naturally takes place over a longer timespan modifications to the original approach need to be made.
+I suggest...
 
 \section{Evaluation}
 
