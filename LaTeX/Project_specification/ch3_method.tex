@@ -16,15 +16,17 @@ Patients will also log other events such as meals and exercise making those valu
 The objective of the proposed system is to analyse the data for a closed time interval, identify meaningful events and classify them accordingly.
 The analasys is not performed in real time but is considered a batch problem.
 The proposed steps of implementation can be overviewed in figure [FIGURE REF].
-Each step is more detailedly described in its subsequent section below.
+Each step is described in more detail in its sorrespondent section below.
 
-\subsection{Online Denoising}
+\subsection{Wavelet Filter}
 
-The data gathered with CGM may include sensor noise.
-Noise can trigger false positives in event detection and small fluctuations hides the true underlying derivatives of the curve.
-As proposed by [REF] applying a [X] filter to produce a filtered signal.
-[Math behind gilet goes here].
-The result of aplying such filter can be seen in figure [FIGURE REF].
+Studies have data from CGM is subject to distortion.
+This is caused by diffusion processes and by time-varying systematic under/overestimations due to calibrations and sensor drifts \parencite{facchinetti2014modeling}.
+Noise can trigger false positives in event detection as abrupt fluctuations hidess true underlying derivatives of the curve \parencite{Facchinetti2016}.
+Wavelet filters have been used repeatedly with CGM data and proved successful in reducing noise while retaining events such as spikes \parencite{Mag2016}, \parencite{Facchinetti2016}, \parencite{samadi2017}.
+Figure \ref{fig:wavelet_example} displays an example of wavelet filtering applied to CGM data.
+
+\input{images/wavelet_example}
 
 \subsection{Qualitative Representation}
 
