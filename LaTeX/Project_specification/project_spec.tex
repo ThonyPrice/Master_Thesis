@@ -3,7 +3,7 @@
 \usepackage[linesnumbered,ruled]{algorithm2e}
 \usepackage{amsmath}
 \usepackage{booktabs}
-%\usepackage{biblatex}
+\usepackage[backend=biber]{biblatex}
 \usepackage{chngpage}
 \usepackage{csquotes}
 \usepackage{float}
@@ -17,14 +17,14 @@
 \usepackage[parfill]{parskip}
 \usepackage{placeins}
 \usepackage{subcaption}
-\usepackage[backend=biber]{biblatex}
 \addbibresource{references.bib}
 
+% --- TITLE CONTENT ---
 \title{%
     Master Thesis - \\
-    Project Plan and Specification \\
+    Project Specification \\
     \vspace{.5em}
-    \large SMeal Detection and Carbohydrate Estimation from Continuous Glucose Monitoring data \\
+    \large Meal Detection and Carbohydrate Estimation from Continuous Glucose Monitoring data \\
 }
 
 \alttitle{Detta är den svenska översättningen av titeln}
@@ -40,6 +40,7 @@
 \frontmatter
 \titlepage
 
+% --- ABSTRACT ---
 \begin{abstract}
   About this document...
 
@@ -54,111 +55,11 @@
 \tableofcontents
 \mainmatter
 
-\chapter{Introduction}
+\input{ch1_introduction}
+\input{ch2_background}
+\input{ch3_method}
 
-This chapter intends to provide the reader with an overview of the current state of diabetes healthcare as well as the outline and limitations of this thesis project.
-
-\section{Project Introduction}
-
-In every country the disease burden related to diabetes is already high, and it is steadily increasing \parencite{Forouhi2014}.
-In 2017 the estimated prevalence of diabetes was 451 million people globally and approximately 5 million deaths were attributed to diabetes \parencite{Cho2018}.
-Aside from reduced life expectancy, diabetes increase the risk of multiple other conditions such as heart disease, stroke and peripheral vascular diseases \parencite{Forouhi2014}.
-With a projected prevalence of 693 million diabetes patients in 2045 and given the seriousness of diabetes, proper medical care for patients are of utmost importance \parencite{Cho2018}.
-
-Diabetes is a group of metabolic diseases characterized by hyperglycemia resulting from defects in insulin secretion, insulin action, or both \parencite{ADA2010}.
-Insulin is necessary to maintain normal blood glucose (BG) levels by facilitating cellular glucose uptake and regulating carbohydrate metabolism \parencite{Wilcox2005}.
-The vast majority of cases of diabetes fall into two broad categories, type 1 diabetes (T1D) or type 2.
-T1D is caused by an absolute deficiency of insulin secretion, thus
-patients need to induce exogenous insulin on a regular basis to maintain balanced BG levels \parencite{ADA2010}.
-
-Maintaining balanced BG levels is an every day challenge of T1D patients.
-Treatment guidelines put heavy emphasis on self management activities that benefits a balanced regulation \parencite{Cooke2013}.
-This include activities such as eating patterns, exercise and carbohydrate consumption \parencite{Cooke2013}.
-
-Continuous glucose monitoring (CGM) sensors are wearable devices that measures the blood glucose frequently (usually every 1-5 minutes).
-The data CGM sensors provide enables analysis of a patient's historic BG fluctuations as well as predictions of its development \parencite{Facchinetti2016}.
-
-\textit{Paragraph connecting introduction to project aim...}
-
-\section{Project Aim}
-
-The general idea is to investigate the potential of leveraging CGM data in personalized T1D care.
-Currently the relevant implementations immediate actions such as alerts of high or low BG.
-
-\textit{Extend this section...}
-
-\chapter{Background}
-
-This chapter sets out to...
-
-\section{Diabetes}
-
-\subsection{Definition}
-
-Text...
-
-\section{Tool 1}
-Text...
-
-\section{Tool 2}
-Text...
-
-\section{Tool 3}
-Text...
-
-\section{Previous Work}
-
-\chapter{Methods}
-
-\section{Data}
-
-The data is collected by Steady Health during a 4,5 month pilot study including 20 patients.
-All patients are at least 18 years old and have been injecting insulin at least 1 year prior to the study.
-
-Each patient are equipped with a CGM sensor for the entirety of the study.
-The data i collected at intervals of 1-5 minutes.
-
-
-\medskip
-\begin{table}[h]
-\begin{center}
-  \begin{tabular}{lll}
-  \textbf{
-  Notation &
-  Field &
-  Format \\
-  }
-  \hline
-  $P$ &
-  Patient &
-  Integer \\
-  $t$ &
-  time &
-  $YYMMDD:HHMMSS$ \\
-  $t_{BG}$ &
-  Glucose value at $t$ &
-  Float \\
-  $t_{ACT}$ &
-  Physical activity at $t$ &
-  Integer \\
-  \hline
-  \end{tabular}
-  \caption[]
-  {\small Caption.}
-  \label{table:data_description}
-\end{center}
-\end{table}
-
-\section{Implementation}
-Text...
-
-\section{Evaluation}
-Text...
-
-% Print the bibliography (and make it appear in the table of contents)
-\printbibliography
-%\printbibliography[heading=bibintoc]
-
+\printbibliography[heading=bibintoc]
 % \appendix
 % \chapter{Unnecessary Appended Material}
 
