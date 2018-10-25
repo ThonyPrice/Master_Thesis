@@ -23,15 +23,26 @@ Patients favorably consults a clinician regularly to get consultation regarding 
 
 Continuous glucose monitoring (CGM) sensors are wearable devices that measures the blood glucose frequently (usually every 1-5 minutes).
 The data CGM sensors provide have revolutionized the ability for clinicians to review a patients data and deliver care driven by consistent data \parencite{Facchinetti2016}.
+Care on CGM data have proven effective in lowering patients long term average BG concentration (A1C) \parencite{dungan2018monitoring}.
 The data provide effictive insigt in immediate processes such as accuracy of a specific insulin dosing, the BG concentration peak of a certain meal etc.
-However, there is a lack of research in long term medical advice derived from CGM data.
-
-Generating insigt in long term outcomes of a T1D historical data could provide benefits of both patients and clinicians.
-Patints could through very hand on interaction gain insight in which activities are...
+However, there is a lack of research in deriving insights for long term medical advice autonomous from CGM data.
 
 \section{Project Aim}
 
-The general idea is to investigate the potential of leveraging CGM data in personalized T1D care.
-Currently the relevant implementations immediate actions such as alerts of high or low BG.
+Generating insigt in long term outcomes of a T1D patient's historical data could provide benefits to both patients and clinicians.
+Patients could receive feedback automated feedback of current habits and its potential impact on long term A1C.
+Clinicians benefit from automated insights in a patient's be reducing the risk of missing patterns.
+Autonomous insights can be reviewd by clinicians as second opinion to form a more objective care plan too.
 
-\textit{Extend this section...}
+\subsection{Objective}
+
+The objective of this thesis is to investigate how an automonous system, which fulfills the cartain criteria below, can be implemented and in which configuration it perfoms optimally. The system should:
+\begin{itemize}
+  \item Detect events in from a batch CGM time series data (such as meal, exercise or sleep).
+  \item Classify the event of the event.
+  \item Estimate intervention caused by an event (what impact did the event have on the continued time series).
+\end{itemize}
+
+\subsection{Research Question}
+
+Can techniques and algorithms X, Y, Z provide a system complying with the specifications defined in Objective?
