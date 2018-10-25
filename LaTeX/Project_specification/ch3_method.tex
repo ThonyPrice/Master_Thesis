@@ -2,27 +2,29 @@
 
 \section{Data}
 
-The data is collected by Steady Health during a 4,5 month pilot study including 20 patients.
+The data is collected during a 4,5 month pilot study includes 20 patients.
 All patients are at least 18 years old and have been injecting insulin at least 1 year prior to the study.
-
 Each patient are equipped with a CGM sensor for the entirety of the study.
-For each patient, the CGM collected BG data at intervals of 1-5 minutes.
-Patients will also log other events such as meals and exercise making those values accessible at some of the times steps.
+For each patient, the CGM sensor measures the BG concentration (BGC) at intervals of 1-5 minutes.
+The time-BGC constitues the structure of each patient's data set.
+Additionally, other events such as meals and exercise are logged manually by and are also associated with a certain time. A summary of collected data points are presented in table \ref{table:data_description}.
 
 \input{tables/data_description.tex}
 
 \section{Implementation}
 
-The objective of the proposed system is to analyse the data for a closed time interval, identify meaningful events and classify them accordingly.
-The analasys is not performed in real time but is considered a batch problem.
-The proposed steps of implementation can be overviewed in figure [FIGURE REF].
-Each step is described in more detail in its sorrespondent section below.
+The objective of the proposed system is to analyse the data for a closed time interval, identify meaningful events and classify them accordingly with respect to their influence over future measurements.
+The analysis is not performed in real time, thus should be considered a batch problem (that is, all data is available immideatly).
+The proposed steps of implementation can be overviewed in figure \ref{fig:flowchart}.
+Each step is described in more detail in its corresponding section below.
+
+\input{images/flowchart}
 
 \subsection{Wavelet Filter}
 
-Studies have data from CGM is subject to distortion.
+Studies have shown data from CGM is subject to distortion.
 This is caused by diffusion processes and by time-varying systematic under/overestimations due to calibrations and sensor drifts \parencite{facchinetti2014modeling}.
-Noise can trigger false positives in event detection as abrupt fluctuations hidess true underlying derivatives of the curve \parencite{Facchinetti2016}.
+Noise can trigger false positives in event detection because abrupt fluctuations overrides the true underlying derivatives of the curve \parencite{Facchinetti2016}.
 Wavelet filters have been used repeatedly with CGM data and proved successful in reducing noise while retaining events such as spikes \parencite{Mag2016}, \parencite{Facchinetti2016}, \parencite{samadi2017}.
 Figure \ref{fig:wavelet_example} displays an example of wavelet filtering applied to CGM data.
 
@@ -44,15 +46,15 @@ The derivates can be read from segment adjecent points allowing a CGM data serie
 \subsection{Event Detection}
 
 With the qualitative representation event detection can be performad by analysing the sequence of shapes.
-In figure \ref{fig:curve2shape} an event could be triggered by identifying a continously accelerating increase (4 D's in a row from timestep 12).
+In figure \ref{fig:curve2shape} an event could be triggered by identifying a continously accelerating increase (for example the four sequential D's from timestep 12).
 
 \input{images/curve2shape}
 
-The detection algorithm could be [INSERT SMART ALG HERE].
+Given a sequence of observations (i.e. shapes) with some underlying state (i.e. eating, sleeping, exercising) a hidden Markov model can provide an estimate of what state a current time step most probably corresponds to.
 
 \subsection{Intervention Analysis}
 
-Intervention analysis provides a tool to asses how much a given even has changes the series (if at all) \parencite{box2015time}.
+Intervention analysis provides a tool to asses how much a given event has changes the series (if at all) \parencite{box2015time}.
 The analysis is able to detect 4 patterns:
 
 \begin{enumerate}
@@ -62,10 +64,14 @@ The analysis is able to detect 4 patterns:
   \item Initial change followed by gradual return to previous mean level.
 \end{enumerate}
 
-[INSERT INSTERVENTION ANALYSIS MATH HERE]
+Intervention analysis compare the mean average before the event and its progression afterwards.
+The characteristics of the progression curve defines which of the four patterns it correspond to.
+Because changes in mean BG concentration are subtle and changes naturally takes place over a longer timespan, an alternative to the approach is suggested.
 
-Because changes in mean BG concentration are subtle and changes naturally takes place over a longer timespan modifications to the original approach need to be made.
-I suggest...
+An event by itself may not cause a observable change in the mean average but combined events might.
+The intervention analysis is also evaluated on sets of adjecent events.
+The output can hint on when the aggregated data implies a positive development of the mean.
+In other words, the analysis can suggest when combined activities by a patient results in a change of his or her long term A1C value.
 
 \section{Evaluation}
 
