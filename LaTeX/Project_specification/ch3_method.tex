@@ -13,12 +13,37 @@ Patients will also log other events such as meals and exercise making those valu
 
 \section{Implementation}
 
-The proposed implementation to achieve X can be overviewed in flowchart [REF].
+The objective of the proposed system is to analyse the data for a closed time interval, identify meaningful events and classify them accordingly.
+The analasys is not performed in real time but is considered a batch problem.
+The proposed steps of implementation can be overviewed in figure [FIGURE REF].
 Each step is more detailedly described in its subsequent section below.
 
 \subsection{Online Denoising}
 
-Due to potential noise in CGM data preprocessing by denoising
+The data gathered with CGM may include sensor noise.
+Noise can trigger false positives in event detection and small fluctuations hides the true underlying derivatives of the curve.
+As proposed by [REF] applying a [X] filter to produce a filtered signal.
+[Math behind gilet goes here].
+The result of aplying such filter can be seen in figure [FIGURE REF].
+
+\subsection{Qualitative Representation}
+
+To identify events in the denoised CGM data feature extraction is used.
+Feature extraction can be acheived by either a qualitative or quantitative method.
+The qualitative method offer benefits such as more transparent reasoning and ability to provide explanations for for solutions provided \parencite{Ven2003}.
+
+Triangular representation...
+
+Membership degree...
+
+\subsection{Intervention Analysis}
+
+Detect event with impact on trend average.
 
 \section{Evaluation}
-Text...
+
+Training/test...
+
+Padova...
+
+Manual labeling...
