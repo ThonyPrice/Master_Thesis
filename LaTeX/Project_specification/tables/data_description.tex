@@ -1,0 +1,36 @@
+\medskip
+\begin{table}[h]
+\begin{center}
+  \begin{tabular}{lll}
+  \textbf{Notation} &
+  \textbf{Field} &
+  \textbf{Format} \\
+  \hline
+  $P$ &
+  Patient &
+  Integer \\
+  $t$ &
+  Time &
+  $YYMMDD:HHMMSS$ \\
+  $t_{BG}$ &
+  Glucose value at $t$ &
+  Float \\
+  $t_{ACT}$ &
+  Physical activity at $t$ &
+  Integer \\
+  $t_{INS}$ &
+  Injected insulin at $t$ &
+  Float \\
+  $t_{IMG}$ &
+  Food image at $t$ &
+  Float \\
+  $t_{EVENT}$ &
+  Manually reported by patient at $t$ &
+  Text \\
+  \hline
+  \end{tabular}
+  \caption[]
+  {\small The data for each patient include continuous measurements at time steps $t$ of intervals between 1-5 minutes. Each measurement at $t$ \textit{always} include BG value and \textit{may} contain other field presented in the table.}
+  \label{table:data_description}
+\end{center}
+\end{table}
