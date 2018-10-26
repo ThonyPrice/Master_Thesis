@@ -51,7 +51,8 @@ In figure \ref{fig:curve2shape} an event could be triggered by identifying a con
 
 \input{images/curve2shape}
 
-Given a sequence of observations (i.e. shapes) with some underlying state (i.e. eating, sleeping, exercising) a hidden Markov model can provide an estimate of what state a current time step most probably corresponds to. The Markov approach includes two steps:
+Given a sequence of observations (i.e. shapes) with some underlying state (i.e. eating, sleeping, exercising) a hidden Markov model can provide an estimate of what state a current time step most probably corresponds to.
+The Markov approach includes two steps:
 
 \textbf{The evaluation problem}: Calculating probability distribution by training a model on sequences with labeled states.
 
@@ -81,8 +82,14 @@ In other words, the analysis can suggest when combined activities by a patient r
 
 \section{Evaluation}
 
-Training/test...
+The method is evaluated in two steps:
 
-Padova...
+\textbf{Detection of events}: For each patient, a 80/20\% data split is made into training and test data respectively.
+The training data is utilized to solve the Markov evaluation problem and find model parameters.
+The labels are removed from the test data the events are produced from the Markov decoding step of the algorithm.
+A comparison of the removed (true) labels and the proposed ones are made and accuracy and precision measurements serves the basis of this evaluation.
 
-Manual labeling...
+\textbf{Intervention analysis}: Given that the algorithm has produced a set of events with suggested interventions.
+A clinician is presented the same data and suggested events.
+The clinician performs a independent assessment of the probable intervention caused by these events.
+The algorithmic output is then compared to the clinicians and an accuracy and precision score is studied to evaluate the performance of the intervention analysis.
