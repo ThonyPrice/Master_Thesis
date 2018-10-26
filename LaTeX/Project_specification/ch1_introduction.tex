@@ -1,6 +1,6 @@
 \chapter{Introduction}
 
-This chapter intends to provide the reader with an overview of the current state of diabetes healthcare as well as explain the outline, aim and limitation of this thesis project.
+This chapter intends to provide the reader an overview of the current state of diabetes healthcare as well as explain the outline and aim of this thesis project.
 
 \section{Project Introduction}
 
@@ -9,40 +9,40 @@ In 2017 the estimated prevalence of diabetes was 451 million people globally and
 Aside from reduced life expectancy, diabetes increase the risk of multiple other conditions such as heart disease, stroke and peripheral vascular diseases \parencite{Forouhi2014}.
 With a projected prevalence of 693 million diabetes patients in 2045 and given the seriousness of diabetes, proper medical care for patients are of utmost importance \parencite{Cho2018}.
 
-Diabetes is a group of metabolic diseases that is characterized by hyperglycemia resulting from defects in insulin secretion, insulin action, or both \parencite{ADA2010}.
-Insulin is necessary to maintain normal blood glucose (BG) levels by facilitating cellular glucose uptake and regulating carbohydrate metabolism \parencite{Wilcox2005}.
-The vast majority of cases of diabetes fall into two broad categories, type 1 diabetes (T1D) or type 2.
-T1D is caused by an absolute deficiency of insulin secretion, thus
-patients need to induce exogenous insulin on a regular basis to maintain balanced BG levels \parencite{ADA2010}.
+Diabetes is a group of metabolic diseases that is characterized by hyperglycemia.
+It resulting from defects in insulin secretion, insulin action, or both \parencite{ADA2010}.
+Insulin is necessary to maintain normal blood glucose concentration (BGC) internally by facilitating cellular glucose uptake and regulating carbohydrate metabolism \parencite{Wilcox2005}.
+The vast majority of cases of diabetes fall into two broad categories, type 1 diabetes (T1D) and type 2.
+T1D is caused by an absolute deficiency of insulin secretion, thus patients need to induce exogenous insulin on a regular basis to maintain a balanced BGC \parencite{ADA2010}.
 
-Maintaining balanced BG levels is an every day challenge of T1D patients.
-Treatment guidelines put heavy emphasis on self management activities that benefits a balanced regulation.
-This include activities such as eating patterns, exercise and carbohydrate consumption.
-Patients favorably consults a clinician regularly to get consultation regarding evalation and making plans for the self management process \parencite{Cooke2013}.
-
+Maintaining balanced BGC is an every day challenge of T1D patients.
+Treatment guidelines put heavy emphasis on self management activities that benefit a balanced regulation.
+This include recommendations of eating patterns, exercise, carbohydrate consumption and much more.
+Patients favorably consult a clinician regularly to get evaluate these activities and plan for the continued self management process \parencite{Cooke2013}.
 
 Continuous glucose monitoring (CGM) sensors are wearable devices that measures the blood glucose frequently (usually every 1-5 minutes).
-The data CGM sensors provide have revolutionized the ability for clinicians to review a patients data and deliver care driven by consistent data \parencite{Facchinetti2016}.
-Care on CGM data have proven effective in lowering patients long term average BG concentration (A1C) \parencite{dungan2018monitoring}.
-The data provide effictive insigt in immediate processes such as accuracy of a specific insulin dosing, the BG concentration peak of a certain meal etc.
-However, there is a lack of research in deriving insights for long term medical advice autonomous from CGM data.
+CGM sensors have revolutionized the ability for clinicians to review a patients data and deliver care driven by extensive data \parencite{Facchinetti2016}.
+Care based CGM data have proven effective in lowering patients long term average BGC, known as HbA1c \parencite{dungan2018monitoring}.
+The data enable precise monitoring of immediate processes, such as accuracy of a specific insulin dosing, BGC peak after a certain meal etc.
+However, there is a lack of research in deriving insights for long term medical advice autonomously from CGM data.
 
 \section{Project Aim}
 
-Generating insigt in long term outcomes of a T1D patient's historical data could provide benefits to both patients and clinicians.
-Patients could receive feedback automated feedback of current habits and its potential impact on long term A1C.
-Clinicians benefit from automated insights in a patient's be reducing the risk of missing patterns.
-Autonomous insights can be reviewd by clinicians as second opinion to form a more objective care plan too.
+Given CGM data of a patient, autonomously generate insight of which events and patterns in the data indicates a certain progression of long term HbA1c.
+For example, if provided 8 week's worth of data some segments of the data may infer a healthy development, such as healthy meals and exercise.
+The aim is to detect these events in the CGM data in order to classify which activities have a positive impact on a patient's HbA1C.
 
 \subsection{Objective}
 
-The objective of this thesis is to investigate how an automonous system, which fulfills the cartain criteria below, can be implemented and in which configuration it perfoms optimally. The system should:
+The objective of this thesis is to investigate how an autonomous system, which fulfills the certain criterias below, can be implemented and in which configuration it performs optimally. The system should:
 \begin{itemize}
-  \item Detect events in from a batch CGM time series data (such as meal, exercise or sleep).
-  \item Classify the event of the event.
-  \item Estimate intervention caused by an event (what impact did the event have on the continued time series).
+  \item Detect events in from a batch CGM time series data (such as meals, exercises or sleep).
+  \item Estimate intervention caused by one or more events (what impact did the event(s) have on the continued time series).
 \end{itemize}
 
 \subsection{Research Question}
 
-Can techniques and algorithms X, Y, Z provide a system complying with the specifications defined in Objective?
+\begin{enumerate}
+  \item Is it possible to detect events from a sequence of qualitative representations generated from a batch CGM data using a hidden Markov model?
+  \item Given one or more events in (1.), can intervention analysis estimate the long term impact of a single, or a set of events?
+\end{enumerate}
