@@ -51,6 +51,7 @@ class AggregatedMealModel(BaseEstimator, ClassifierMixin):
         self.models_ = [0]*self.n_users_
 
         for it, usr_X in enumerate(X):
+
             self.models_[it] = MealPredictionModel(
                     self.horizon, self.x0, self.dx, self.g, self.h, self.dt,
                     self.meal_duration, self.meal_threshold)
@@ -59,19 +60,22 @@ class AggregatedMealModel(BaseEstimator, ClassifierMixin):
         return self
 
 
-    def score(self, X, y, mode='PPV'):
+    def score(self, X, y=None, mode='PPV', verbose=0):
         """Score each individual MealPrediction model and return mean.
 
         Keyword arguments:
         X -- Vectors to fit model on.
         y -- Target vecor for all users.
         mode -- What type of score we're interested in.
+        verbose -- Print score of each individual model (1) or not (0).
         """
 
         self.usr_scores_ = [0]*self.n_users_
 
         for it, usr_y in enumerate(y):
-            self.usr_scores_[it] = self.models_[it].score(y=usr_y, mode=mode)
+            self.usr_scores_[it] = self.models_[it].score(y=usr_y,
+                                                          mode=mode,
+                                                          verbose=verbose)
 
         self.usr_scores_ = np.array(self.usr_scores_)
         return self.usr_scores_.mean()

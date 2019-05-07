@@ -82,8 +82,8 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
         for it, cgm in enumerate(self.cgm_series_):
 
             bolus_vector = self._verify_bolus_vector(self.bolus_series_,
-                                                    self.horizon,
-                                                    it)
+                                                     self.horizon,
+                                                     it)
             glucose_estimate = self.G_h_filter_.predict()
             cgm_prediction = self.CompartmentModel.predict_n(n=self.horizon,
                                                              bolus=bolus_vector,
@@ -189,12 +189,13 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
         return bolus_vector
 
 
-    def score(self, y, mode='PPV'):
+    def score(self, y, mode='PPV', verbose=0):
         """Given a vector of ground truth, score the prediction made.
 
         Keyword arguemnts:
         y -- Binary array with 1 marking timesteps where meal were logged.
         mode -- Select score type.
+        verbose -- Print the final score (1) or not (0).
         """
 
         # Reshape and clip labels according to horizon
@@ -250,10 +251,10 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
         FN = len(false_negative_idxs)
 
         prediction_offsets = np.array(prediction_offsets)
-        if prediction_offsets.size != 0:
+        if prediction_offsets.shape[0] != 0:
             mean_std = (prediction_offsets.mean(), prediction_offsets.std())
         else:
-            mean_std = (120, 120)
+            mean_std = (300, 300)
 
         self.scores_ = {
             # Detection offsets and standard deviation (mean):
@@ -263,5 +264,7 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
             # False Discovery Rate (FDR):
             'FDR': 1 - (TP/(TP+FP))
         }
+        if verbose:
+            print(self.scores_[mode])
 
         return self.scores_[mode]
