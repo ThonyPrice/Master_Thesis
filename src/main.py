@@ -77,7 +77,7 @@ def main():
     dfs = [PreProcessPipe.apply(df) for df in dfs]
 
     # Cap data size while testing
-    N = 2000
+    N = -1
 
     # Aggregate data over users
     X_agg = [usr_df[['units', 'quantity']].values[:N,:] for usr_df in dfs]
@@ -86,9 +86,9 @@ def main():
 
     # GridSearch Params
     param_grid = {
-            #'horizon': [30, 45],#[30, 45],
-            'g': np.linspace(.001, .5, 5), #np.random.uniform(1./100, 1., 3),
-            'h': np.linspace(.001, .5, 5), #np.random.uniform(1./100, 1., 3)
+            'horizon': [30, 45],#[30, 45],
+            'g': np.linspace(.0001, 5, 10), #np.random.uniform(1./100, 1., 3),
+            'h': np.linspace(.0001, 5, 10), #np.random.uniform(1./100, 1., 3)
             'meal_threshold': np.linspace(2,10,2)
     }
 
