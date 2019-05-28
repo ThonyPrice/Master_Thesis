@@ -1,6 +1,10 @@
 import inspect
 
 import numpy as np
+import pandas as pd
+
+from scipy.interpolate import pchip_interpolate
+from scipy.signal import savgol_filter
 from sklearn.base import BaseEstimator, ClassifierMixin
 
 from MinimalBergmanModel import BergmanModel
@@ -14,17 +18,21 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
     incorporates a twocompartment glucose subsystem, an insulin subsystem,
     and a three-compartment insulin action subsystem.
 
-    The model is designed to and Bolus injection time series data
-    and a glucose estimation obtained through a g-h filter to predict
-    future CGM values.
+    The model is designed to take a Bolus injection and CGM measurements
+    time series data. Among with a carbohydrate input estimation future
+    glocode values are predicted. Prediction and cgm-meaasurement residuals
+    are provided with carbohydrate estimate to an alpha-beta filter to refine
+    the carbohydrate intake estimation.
 
-    The residuals between predicted CGM and measured data points
-    indicates a large unaccounted meal is introduced into the system and
-    the final goal of this model is to detect said meals.
+    When a carbohydrate estimation significantly higher than the average
+    (one standard deviation away) is registred a the model predicts a meal
+    at the goven time step.
     """
 
-    def __init__    (self, horizon=40, x0=0, dx=0, g=.6, h=.01, dt=1.,
-                    meal_duration=30, meal_threshold=10):
+    def __init__    (self, horizon=45, data_frequency=5, x0=0, dx=0, g=.6,
+                    h=.01, dt=1., meal_duration=60, meal_threshold=10,
+                    savgol_poly=1, savgol_len=15):
+
         """Initialize Prediction class
 
         Keywork arguments:
@@ -55,51 +63,136 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
             setattr(self, arg, val)
 
 
+    def split_into_horizon_chunks(self, arr):
+        """Chunk input array to represent sliding window of size=horizon"""
+
+        window = self.horizon//self.data_frequency
+        for i in range(0, len(arr)-window):
+            yield arr[i:i+window+1]
+
+
     def fit(self, X, y=None):
-        """Performs g-h filter on 1 state variable with a fixed g and h.
+        """Predict meals for a time period N given insulin and cgm measurements.
 
         Keyword arguemnts:
         X -- Numpy array with shape (N,2).
-            Column 0 -- Time series of length N with Bolus data.
-            Column 1 -- Time series of length N with CGM data.
-        y -- Should not be provided to, argument required by sklearn.
+            Col 0 -- Time series of length N with Bolus data.
+            Col 1 -- Time series of length N with CGM data.
+        y -- Not used, argument required by sklearn.
         """
 
-        # Prep data
-        self.cgm_series_ = X[:-self.horizon,1]
-        self.cgm_targets_ = self._shift_horizon(X[:,1], self.horizon)
-        self.bolus_series_ = X[:-self.horizon,0]
-
         # Initialize new variables
-        N = X.shape[0] - self.horizon
-        self.rss_ = np.zeros(N)
+        N = X.shape[0]
+        self.bolus_inputs_ = X[:,0]
+        self.cgm_inputs_ = X[:,1]
+
+        self.carb_ests_ = np.zeros(N)
+        self.carb_mean_ = np.zeros(N)
+        self.carb_stds_ = np.zeros(N)
+
         self.meal_preds_ = np.zeros(N)
         self.meal_flag_ = False
         self.meal_count_ = self.meal_duration
+
         self.G_h_filter_ = G_h_filter(self.x0, self.dx, self.g, self.h, self.dt)
+
+        # Initialize compartments
         self._init_compartment_vars(N)
 
-        for it, cgm in enumerate(self.cgm_series_):
+        # Prepare sliding window chunks
+        bolus_generator = self.split_into_horizon_chunks(self.bolus_inputs_)
+        cgm_generator = self.split_into_horizon_chunks(self.cgm_inputs_)
 
-            bolus_vector = self._verify_bolus_vector(self.bolus_series_,
-                                                     self.horizon,
-                                                     it)
-            glucose_estimate = self.G_h_filter_.predict()
-            cgm_prediction = self.CompartmentModel.predict_n(n=self.horizon,
+        for it, (bolus_vector, cgm_vector) in enumerate(zip(bolus_generator,
+                                                            cgm_generator)):
+            # Process inputs
+            bolus_vector = self.process_insulin(bolus_vector)
+            cgm_vector = self.process_cgm(cgm_vector)
+
+            # Naive carb estimate
+            carb_est = self.G_h_filter_.predict()
+
+            # Compartment Model CGM Predictions
+            cgm_prediction = self.CompartmentModel.predict_n(n=self.horizon+1,
                                                              bolus=bolus_vector,
-                                                             food=glucose_estimate)
-            glucose_est = self.G_h_filter_.update(self.cgm_targets_[it],
-                                                  cgm_prediction)
-            self.CompartmentModel.update_compartments(self.bolus_series_[it],
-                                                      glucose_est)
+                                                             food=carb_est)
+            # Residual based carb estimate update
+            carb_est = self.G_h_filter_.update(cgm_vector,
+                                               cgm_prediction)
 
+            # Save new estimate and update Compartment Model
+            self.carb_ests_[it-1] = carb_est
+            self.CompartmentModel.update_compartments(bolus_vector[0],
+                                                      carb_est)
+
+            # Save compartmen values
             self._add_compartment_vars(it)
-            self._check_meal_alarm(self.cgm_series_[:it], self.Gt[:it], it)
+
+            # Check for Meal detection
+            self._check_meal_alarm(carb_est, self.carb_ests_, it)
 
         return self
 
 
-    def _check_meal_alarm(self, cgm_series, gt_series, it):
+    def process_insulin(self, bolus_vector):
+        """Process insulin by upsampling to 1 minute resolution
+        and convert Units to to mg.
+        """
+
+        bolus_vector = self.upsample_insulin(bolus_vector)
+        bolus_vector = self.convert_units_to_mg(bolus_vector)
+
+        return bolus_vector
+
+
+    def upsample_insulin(self, bolus_vector):
+        """Upsample to 1 minute resolution and cast as floats."""
+
+        # Set all indices where zero padding should be placed
+        pad_idxs = np.arange(1,len(bolus_vector))
+        pad_idxs = np.repeat(pad_idxs, self.data_frequency-1)
+
+        # Insert zeros to upsample data resolution
+        bolus_vector = np.insert(bolus_vector, pad_idxs, 0, axis=0)
+
+        return bolus_vector.astype(float)
+
+
+    def convert_units_to_mg(self, units):
+        """Convert administred insulin (boluses) from Units to mg."""
+
+        return units*0.347
+
+
+    def process_cgm(self, cgm_vector):
+        """Docstring..."""
+
+        cgm_vector = self.upsample_interpolate(cgm_vector)
+        cgm_vector = self.savgol_smoothing(cgm_vector)
+
+        return cgm_vector
+
+
+    def upsample_interpolate(self, cgm_vector):
+        """Docstring..."""
+
+        x_axis = np.arange(0,self.horizon+1,self.data_frequency)
+        return pchip_interpolate(x_axis, cgm_vector, np.arange(self.horizon+1))
+
+
+    def savgol_smoothing(self, signal):
+        """Smoothen the CGM data by using a Savgol filter, parameters and
+        previous results on CGM smoothing can be found in:
+            - https://pubs.acs.org/doi/abs/10.1021/ie3034015
+        """
+
+        return savgol_filter(signal,
+                             window_length=self.savgol_len,
+                             polyorder=self.savgol_poly,
+                             mode='interp')
+
+
+    def _check_meal_alarm(self, curr_est, carb_estimates, it):
         """Return meal detection predictions based of estimated glucose values
 
         Keyword arguemnts:
@@ -107,16 +200,20 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
         gt_series -- Cgm predictions from g-h filter over Bergman model.
         """
 
-        # Can't calculare gradient of RSS on a single value
-        if it < 3:
+        # Allow for 3 hours (60 min * 3) calibration time
+        if it < 60*3:
             return
 
-        # Find series of RSS gradient at each time step
-        self.rss_ = (cgm_series-gt_series)**2
-        rss_grads = np.gradient(self.rss_)
+        # Find mean and std of carb estimates so far
+        c_mean = carb_estimates.mean()
+        c_std = carb_estimates.std()
+
+        # Store values
+        self.carb_mean_[it-1] = c_mean
+        self.carb_stds_[it-1] = c_std
 
         # Raise meal detected when threshold is exceeded - keep meal flag up to avoid dupes
-        if rss_grads[it-1] > self.meal_threshold and self.meal_flag_ is False:
+        if curr_est >= c_mean + c_std and self.meal_flag_ is False:
                 self.meal_preds_[it-1] = 1
                 self.meal_flag_ = True
 
@@ -200,7 +297,7 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
 
         # Reshape and clip labels according to horizon
         y = y.reshape(-1)
-        y = y[:-self.horizon]
+        #y = y[:-self.horizon]
         self.y_meals = y
 
         # Scoring function for comparing logged- and predicted meals.
@@ -218,6 +315,10 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
         predicted_meals = self.meal_preds_
 
         for it, meal in enumerate(y):
+
+            if it < 3*60:
+                # Allow calibration time
+                continue
 
             if meal == 1:
             # Meal occurred
@@ -265,6 +366,29 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
             'FDR': 1 - (TP/(TP+FP))
         }
         if verbose:
-            print(self.scores_[mode])
+            print(self.scores_)
 
         return self.scores_[mode]
+
+
+    def store_model(self, path):
+
+        df = pd.DataFrame.from_records({
+            'bolus_inputs_': self.bolus_inputs_,
+            'cgm_inputs_': self.cgm_inputs_,
+            'carb_ests_': self.carb_ests_,
+            'carb_mean_': self.carb_mean_,
+            'carb_stds_': self.carb_stds_,
+            'meal_preds_': self.meal_preds_,
+            'y_meals': self.y_meals,
+            's1': self.s1,
+            's2': self.s2,
+            'gt': self.gt,
+            'mt': self.mt,
+            'It': self.It,
+            'Xt': self.Xt,
+            'Gt': self.Gt
+            # 'scores_': self.scores_
+        })
+
+        df.to_pickle(path)

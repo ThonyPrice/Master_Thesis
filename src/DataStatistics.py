@@ -20,6 +20,12 @@ class DataStatistics(object):
         """
 
         df = self.df.copy(deep=True)
+
+        # Set dateTimetimeIndex
+        df['date'] = df['date'].apply(lambda x: x[:19])
+        df['date'] = pd.to_datetime(df['date'])
+        df.set_index('date', inplace=True)
+
         stats = df.copy(deep=True)
 
         categories = stats[[
@@ -51,6 +57,7 @@ class DataStatistics(object):
         return stats
 
 
-    def to_tex(self, export_path='./data_summary.tex'):
+    def to_tex(self, export_path='./'):
         """Export statistics summary as LaTex table"""
-        self.stats.to_latex(buf=path)
+        f_name = 'data_summary.tex'
+        self.stats.to_latex(buf=export_path+f_name)

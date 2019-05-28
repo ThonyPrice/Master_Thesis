@@ -1,5 +1,8 @@
+import numpy as np
+
 from HvorkaInsulinModel import HvorkaInsulinModel
 from HvorkaGlucoseModel import HvorkaGlucoseModel
+
 
 class BergmanModel(object):
   """Two compartment insulin model
@@ -114,6 +117,9 @@ class BergmanModel(object):
     food -- float representing food at initial time step
     """
 
+    # Prep prediction vector
+    pred = np.zeros(n)
+
     # Save current state of compartments
     InsulinModel_variables = self.insulin_system.get_variables()
     GlucoseModel_variables = self.glucose_system.get_variables()
@@ -122,12 +128,13 @@ class BergmanModel(object):
     for it in range(n):
       self.update_compartments(bolus[it], food)
       food = 0
+      pred[it] = self.Gt
 
-    prediction = self.Gt
+    # prediction = self.Gt
 
     # Reset states of compartment models
     self.insulin_system.set_variables(*InsulinModel_variables)
     self.glucose_system.set_variables(*GlucoseModel_variables)
     self.set_variables(*BergmanModel_variables)
 
-    return prediction
+    return pred

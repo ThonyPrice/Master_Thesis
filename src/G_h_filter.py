@@ -25,7 +25,7 @@ class G_h_filter(object):
 
     def update(self, y, y_pred):
         # Update step
-        self.residual = y - y_pred
+        self.residual = (y-y_pred).mean()
         self.dx = self.dx + self.h * self.residual / self.dt
         self.x = self.x_est + self.g * self.residual
         self.x = max(0, self.x)
