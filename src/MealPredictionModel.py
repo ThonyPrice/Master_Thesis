@@ -31,7 +31,7 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
     """
 
     def __init__    (self, horizon=45, data_frequency=5, x0=0, dx=0, g=.6,
-                    h=.01, dt=1., meal_duration=60, meal_threshold=10,
+                    h=.01, dt=1., meal_duration=45, meal_threshold=10,
                     savgol_poly=1, savgol_len=15):
 
         """Initialize Prediction class
@@ -216,7 +216,7 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
         self.carb_stds_[it-1] = c_std
 
         # Raise meal detected when threshold is exceeded - keep meal flag up to avoid dupes
-        if curr_est >= c_mean + c_std and self.meal_flag_ is False:
+        if curr_est >= c_mean + c_std*2.5 and self.meal_flag_ is False:
                 self.meal_preds_[it-1] = 1
                 self.meal_flag_ = True
 
@@ -397,5 +397,5 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
 
         df.to_pickle(path)
 
-        with open('./results/m-test-1-pred.pkl', 'wb') as f:
-            pickle.dump(self.cgm_preds_, f)
+        # with open('./results/m-test-1-pred.pkl', 'wb') as f:
+        #     pickle.dump(self.cgm_preds_, f)

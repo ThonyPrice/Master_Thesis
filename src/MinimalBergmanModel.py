@@ -127,7 +127,7 @@ class BergmanModel(object):
 
     for it in range(n):
       self.update_compartments(bolus[it], food)
-      food = 0
+      food = np.random.rand()
       pred[it] = self.Gt
 
     # prediction = self.Gt

@@ -56,21 +56,35 @@ def main():
             df[MEAL_COL_NAME].values.reshape(-1,1)]).astype(float)
             for df in dfs]
 
-    # Pick single user for testing
-    X, y = data[0][:,:2], data[0][:,2]
+    # Prep variable for soring all scores
+    agg_scores = {}
 
-    # Run Model
-    M = MealPredictionModel()
-    M.fit(X)
-    M.score(y, verbose=True)
-    M.store_model(path='./results/m-test-1.pkl')
+    # Evaluate each user
+    for it, user_data in enumerate(data):
 
+        # Separate data
+        X, y = user_data[:,:2], user_data[:,2]
 
-    # # Aggregate data over users
-    # X_agg = [usr_df[['units', 'quantity']].values[:N,:] for usr_df in dfs]
-    # y_agg = [usr_df[['meal']].values[:N] for usr_df in dfs]
-    # # print_all_data_shapes(X_agg, y_agg)
-    #
+        # Grab user id and mk storage path
+        u_id = USR_IDS[it]
+        store_model_path = './results/model_%s_%s.pkl'%\
+                        (u_id, time.strftime("%Y-%m-%d-%H:%M"))
+
+        # Run Model
+        M = MealPredictionModel()
+        M.fit(X)
+        M.score(y, verbose=True)
+        M.store_model(path=store_model_path)
+
+        agg_scores[u_id] = M.scores_
+
+    # Save aggregated scores
+    f_name = './results/agg_scores_%s.pkl'%\
+                    (time.strftime("%Y-%m-%d-%H:%M"))
+    with open(f_name, 'wb') as f:
+        pickle.dump(agg_scores, f)
+
+    
     # # GridSearch Params
     # param_grid = {
     #         'horizon': [30, 45],#[30, 45],
