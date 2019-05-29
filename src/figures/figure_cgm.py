@@ -6,50 +6,52 @@ import numpy as np
 import plot_utils as pu
 import pandas as pd
 from scipy.interpolate import pchip_interpolate
-
+from scipy.signal import savgol_filter
 
 # Script:
-# python3 various-meal-impacts.py --save ./meal_responses.eps
+# python3 figure_cgm.py --save ./eps/plain_cgm.eps
+# python3 figure_cgm.py --save ./png/plain_cgm.png
 
 
 def main(args):
-    """Plot multiple meals to illustrate the variance in meal responses."""
+    """Visualize basic CGM - This can be used as a template to add
+    more coupled data."""
 
     # Load data
-    F_NAME = 'data/minimal_tracking_data.2019-05-32.csv'
+    F_NAME = './../data/minimal_tracking_data.2019-05-32.csv'
     df = pd.read_csv(F_NAME)
-
-    # Set window length of meal response
-    frequency = 5
-    w_len = (2*60)//frequency
-    x = np.arange(w_len)
 
     # Pick a user
     random.seed(42)
     usr_id = random.choice(df['user_id'].unique())
     df = df[df['user_id'] == usr_id]
-    df.reset_index(inplace=True)
 
-    # Prep data - Select frames only just after a meal is logged
-    meal_chunks = []
-    meal_idxs = df.index[df['meal'] == 1].tolist()
+    # Set dateTimetimeIndex
+    df['date'] = df['date'].apply(lambda x: x[:19])
+    df['date'] = pd.to_datetime(df['date'])
+    df.set_index('date', inplace=True)
 
-    for meal_idx in meal_idxs:
-        meal_chunks.append(df.loc[meal_idx:meal_idx+w_len-1]['quantity'].values)
+    # Pick a day
+    date = random.choice(df.index.date)
+    df = df[date.strftime('%Y-%m-%d')]
 
-    # Normalize to have every line start from 0
-    for it, chunk in enumerate(meal_chunks):
-        delta = chunk[0]
-        meal_chunks[it] = [x-delta for x in chunk]
-
+    # Original CGM
+    original_x_axis = np.arange(0,60*24,5)
+    original_cgm_data = df['quantity']
 
     # Increase resolution by interpolation
-    x_axis = np.arange(0,w_len*frequency,frequency)
-    new_x_axis = np.arange(w_len*frequency)+1
+    new_x_axis = np.arange(0,60*24,1)
+    new_cgm_vals = pchip_interpolate(original_x_axis,
+            original_cgm_data, new_x_axis)
 
-    meal_chunks = [pchip_interpolate(
-        x_axis, chunk, new_x_axis)
-        for chunk in meal_chunks]
+    smoothed_cgm = savgol_filter(new_cgm_vals,
+                             window_length=15,
+                             polyorder=1,
+                             mode='interp')
+
+    # Remove overlap of indices
+    # new_x_axis = new_x_axis[~original_x_axis]
+    # new_cgm_vals = new_cgm_vals[~original_x_axis]
 
     # Prepare figure
     pu.figure_setup()
@@ -58,10 +60,19 @@ def main(args):
 
     # Plot
     ax = fig.add_subplot(111)
-    for meal in meal_chunks:
-        ax.plot(new_x_axis, meal, c='b', lw=pu.plot_lw(), alpha=.3)
+    ax.axhspan(70, 180, alpha=0.1, color='black')
+    ax.set_ylim(0,350)
+    ax.plot(original_x_axis, original_cgm_data, marker='o', c='g',
+            linewidth=0, markersize=1
+            )
+    ax.plot(new_x_axis, new_cgm_vals, marker='o', c='g', alpha=.2,
+            linewidth=0, markersize=1
+            )
+    # ax.plot(new_x_axis, smoothed_cgm, c='black', alpha=.3,
+    #         linestyle='dashed'
+    #         )
     ax.set_xlabel('$t (minutes)$')
-    ax.set_ylabel('$\Delta mg/dl$')
+    ax.set_ylabel('$ mg/dl$')
 
     ax.set_axisbelow(True)
 

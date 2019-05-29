@@ -2,6 +2,7 @@ import inspect
 
 import numpy as np
 import pandas as pd
+import pickle
 
 from scipy.interpolate import pchip_interpolate
 from scipy.signal import savgol_filter
@@ -89,6 +90,7 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
         self.carb_ests_ = np.zeros(N)
         self.carb_mean_ = np.zeros(N)
         self.carb_stds_ = np.zeros(N)
+        self.cgm_preds_ = np.zeros((N,self.horizon+1))
 
         self.meal_preds_ = np.zeros(N)
         self.meal_flag_ = False
@@ -116,6 +118,7 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
             cgm_prediction = self.CompartmentModel.predict_n(n=self.horizon+1,
                                                              bolus=bolus_vector,
                                                              food=carb_est)
+            self.cgm_preds_[it] = cgm_prediction
             # Residual based carb estimate update
             carb_est = self.G_h_filter_.update(cgm_vector,
                                                cgm_prediction)
@@ -376,6 +379,7 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
         df = pd.DataFrame.from_records({
             'bolus_inputs_': self.bolus_inputs_,
             'cgm_inputs_': self.cgm_inputs_,
+            # 'cgm_preds_': self.cgm_preds_,
             'carb_ests_': self.carb_ests_,
             'carb_mean_': self.carb_mean_,
             'carb_stds_': self.carb_stds_,
@@ -392,3 +396,6 @@ class MealPredictionModel(BaseEstimator, ClassifierMixin):
         })
 
         df.to_pickle(path)
+
+        with open('./results/m-test-1-pred.pkl', 'wb') as f:
+            pickle.dump(self.cgm_preds_, f)

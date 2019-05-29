@@ -63,7 +63,7 @@ def main():
     M = MealPredictionModel()
     M.fit(X)
     M.score(y, verbose=True)
-    M.store_model(path='./results/m-test.pkl')
+    M.store_model(path='./results/m-test-1.pkl')
 
 
     # # Aggregate data over users

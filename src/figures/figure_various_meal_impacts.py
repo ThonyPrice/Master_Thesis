@@ -9,14 +9,15 @@ from scipy.interpolate import pchip_interpolate
 
 
 # Script:
-# python3 figure_various_meal_impacts.py --save ./meal_responses.eps
+# python3 figure_various_meal_impacts.py --save ./eps/meal_responses.eps
+# python3 figure_various_meal_impacts.py --save ./png/meal_responses.png
 
 
 def main(args):
     """Plot multiple meals to illustrate the variance in meal responses."""
 
     # Load data
-    F_NAME = 'data/minimal_tracking_data.2019-05-32.csv'
+    F_NAME = './../data/minimal_tracking_data.2019-05-32.csv'
     df = pd.read_csv(F_NAME)
 
     # Set window length of meal response
