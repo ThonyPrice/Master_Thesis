@@ -1,0 +1,15 @@
+Experiment Parameters:
+
+horizon: 30
+data_frequency: 5
+x0: 0
+dx: 0
+g: 0
+h: 0
+dt: 1
+meal_duration: 30
+savgol_poly: 1
+savgol_len: 15
+calibration_time: 3
+std_mult: 1
+prediction_period: 60

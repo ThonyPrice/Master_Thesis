@@ -13,8 +13,8 @@ def get_fig_size(fig_width_cm, fig_height_cm=None):
         golden_ratio = (1 + math.sqrt(5))/2
         fig_height_cm = fig_width_cm / golden_ratio
 
-    size_cm = (fig_width_cm, fig_height_cm)
-    return size_cm  # map(lambda x: x/2.54, size_cm)
+    scale = 1.3
+    return ((fig_width_cm/2.54)*scale, (fig_height_cm/2.54)*scale)
 
 
 """

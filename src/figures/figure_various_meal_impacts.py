@@ -8,16 +8,27 @@ import pandas as pd
 from scipy.interpolate import pchip_interpolate
 
 
-# Script:
-# python3 figure_various_meal_impacts.py --save ./eps/meal_responses.eps
-# python3 figure_various_meal_impacts.py --save ./png/meal_responses.png
+"""
+Chapter: Background
+
+Description:
+Visualize a variety of CGM resonses from one subject.
+Help make the point that we cannot just look at CGM but must factor in insulin.
+
+Script:
+python3 figure_various_meal_impacts.py --save ./eps/meal_responses.eps
+
+Source:
+https://github.com/Wookai/paper-tips-and-tricks
+"""
+
 
 
 def main(args):
     """Plot multiple meals to illustrate the variance in meal responses."""
 
     # Load data
-    F_NAME = './../data/minimal_tracking_data.2019-05-32.csv'
+    F_NAME = 'data/minimal_tracking_data.csv'
     df = pd.read_csv(F_NAME)
 
     # Set window length of meal response
@@ -51,6 +62,7 @@ def main(args):
     meal_chunks = [pchip_interpolate(
         x_axis, chunk, new_x_axis)
         for chunk in meal_chunks]
+    print('Numer of meals: ', len(meal_chunks))
 
     # Prepare figure
     pu.figure_setup()
@@ -60,12 +72,13 @@ def main(args):
     # Plot
     ax = fig.add_subplot(111)
     for meal in meal_chunks:
-        ax.plot(new_x_axis, meal, c='b', lw=pu.plot_lw(), alpha=.3)
-    ax.set_xlabel('$t (minutes)$')
+        ax.plot(new_x_axis, meal, c='b', lw=.2, linestyle='dashed')
+    ax.set_xlabel('$t \, (minutes)$')
     ax.set_ylabel('$\Delta mg/dl$')
 
     ax.set_axisbelow(True)
 
+    plt.xlim(0,120)
     plt.grid()
     plt.tight_layout()
 

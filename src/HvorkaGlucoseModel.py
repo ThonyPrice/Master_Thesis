@@ -66,7 +66,6 @@ class HvorkaGlucoseModel(object):
     cgm -- Measured glucose value [mg/dl]
     """
     g_t_old, m_t_old = old_variables
-    #m_t_old = cgm
 
     # Update Compartments
     g_t = g_t_old + self.glucose_c1(g_t_old, self.t_G, self.a_G, food_glucose)

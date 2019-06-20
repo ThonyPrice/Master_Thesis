@@ -130,8 +130,6 @@ class BergmanModel(object):
       food = np.random.rand()
       pred[it] = self.Gt
 
-    # prediction = self.Gt
-
     # Reset states of compartment models
     self.insulin_system.set_variables(*InsulinModel_variables)
     self.glucose_system.set_variables(*GlucoseModel_variables)

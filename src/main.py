@@ -1,3 +1,6 @@
+import argparse
+import json
+import os
 import pickle
 import time
 import warnings
@@ -8,17 +11,14 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import KFold
 
 from AggregatedMealModel import AggregatedMealModel
-from DataStatistics import DataStatistics
-from DisableCV import DisableCV
 from MealPredictionModel import MealPredictionModel
 from MinimalBergmanModel import BergmanModel
-from PreProcess import PreProcess
 
 
 # Turn off warning caused by old MacOS driver
-warnings.filterwarnings(    action="ignore",
-                            module="scipy",
-                            message="^internal gelsd")
+warnings.filterwarnings(action="ignore",
+                        module="scipy",
+                        message="^internal gelsd")
 
 # Column names for Data in imported CSV
 CGM_COL_NAME = 'quantity'
@@ -26,25 +26,28 @@ INSULIN_COL_NAME = 'units'
 MEAL_COL_NAME = 'meal'
 
 # File path to read CGM data from
-F_NAME = 'data/minimal_tracking_data.2019-05-32.csv'
+F_NAME = 'data/minimal_tracking_data.csv'
 
-# File path to store Latex tables to
-TEX_PATH = './latex_outputs/'
+# Add experiment description to results folder
+def experiment_description(path, params):
+    with open(path + '/_params.txt', 'w') as f:
+        print('Experiment Parameters:\n', file=f)
+        for p in params: print('%s: %d'%(p, params[p]), file=f)
 
-# File path to store hyper parameter serach results
-HP_PKL_PATH = './parameter_searches/search_%s.pkl'%\
-                (time.strftime("%Y-%m-%d-%H:%M"))
 
+def main(args):
 
-def main():
+    # Read arguments and set up experiment directories
+    PARAMS = json.loads(args.params)
+    RESULTS_PATH = args.save
+    try:
+        os.mkdir(RESULTS_PATH)
+    except:
+        print('Directory %s already exists')
+    experiment_description(RESULTS_PATH, PARAMS)
 
     # Fetch data
     df = pd.read_csv(F_NAME)
-
-    # Print data stats
-    #DataStats = DataStatistics(df)
-    #print(DataStats.summary())
-    # DataStats.to_tex(TEX_PATH)
 
     # Structure Data from DataFrame
     USR_IDS = df['user_id'].unique()
@@ -56,22 +59,21 @@ def main():
             df[MEAL_COL_NAME].values.reshape(-1,1)]).astype(float)
             for df in dfs]
 
-    # Prep variable for soring all scores
+    # Prep dictionary to keep all scores
     agg_scores = {}
 
     # Evaluate each user
     for it, user_data in enumerate(data):
 
-        # Separate data
+        # Split data
         X, y = user_data[:,:2], user_data[:,2]
 
         # Grab user id and mk storage path
         u_id = USR_IDS[it]
-        store_model_path = './results/model_%s_%s.pkl'%\
-                        (u_id, time.strftime("%Y-%m-%d-%H:%M"))
+        store_model_path = '%s/%s.pkl'%(RESULTS_PATH, u_id)
 
         # Run Model
-        M = MealPredictionModel()
+        M = MealPredictionModel(**PARAMS)
         M.fit(X)
         M.score(y, verbose=True)
         M.store_model(path=store_model_path)
@@ -79,43 +81,17 @@ def main():
         agg_scores[u_id] = M.scores_
 
     # Save aggregated scores
-    f_name = './results/agg_scores_%s.pkl'%\
-                    (time.strftime("%Y-%m-%d-%H:%M"))
+    f_name = '%s/agg_scores.pkl'%(RESULTS_PATH)
+    agg_scores_df = pd.DataFrame.from_dict(agg_scores, orient='index')
     with open(f_name, 'wb') as f:
-        pickle.dump(agg_scores, f)
-
-    
-    # # GridSearch Params
-    # param_grid = {
-    #         'horizon': [30, 45],#[30, 45],
-    #         'g': np.linspace(.0001, 5, 10), #np.random.uniform(1./100, 1., 3),
-    #         'h': np.linspace(.0001, 5, 10), #np.random.uniform(1./100, 1., 3)
-    #         'meal_threshold': np.linspace(2,10,2)
-    # }
-    #
-    # grid_search = GridSearchCV(
-    #         estimator=AggregatedMealModel(),
-    #         param_grid=param_grid,
-    #         iid=False,
-    #         cv=DisableCV(),
-    #         refit=False,
-    #         verbose=2)
-    # grid_search.fit(X_agg, y_agg)
-    #
-    # print('Best params:', grid_search.best_params_)
-    # print('Best score:', grid_search.best_score_)
-    #
-    # # Pickle CV results
-    # with open(HP_PKL_PATH, 'wb') as handle:
-    #     pickle.dump(grid_search, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    #
-    # # Run with best params
-    # bestModel = AggregatedMealModel(**grid_search.best_params_)
-    # bestModel.fit(X_agg, y_agg)
-    # bestModel.score(X_agg, y_agg, mode='mean', verbose=1)
-    #
-    # print('*** EOF ***')
+        pickle.dump(agg_scores_df, f)
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-p', '--params')
+    parser.add_argument('-s', '--save')
+
+    args = parser.parse_args()
+    main(args)

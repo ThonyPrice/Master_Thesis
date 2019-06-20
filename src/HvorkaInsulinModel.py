@@ -65,7 +65,8 @@ class HvorkaInsulinModel(object):
     Keyword arguments:
     bolus -- Administered bolus [Units]
     """
-    self.s1_t, self.s2_t, self.U_i = self.new_values(bolus, self.get_variables())
+    self.s1_t, self.s2_t, self.U_i = self.new_values(bolus,
+            self.get_variables())
 
 
   def new_values(self, bolus, old_variables):
@@ -100,9 +101,11 @@ class HvorkaInsulinModel(object):
       U_i_n = new_variables[-1]
       preds[it] = U_i_n
       old_variables = new_variables[:-1]
+
     return preds
 
 
   def bergman_input(self):
     """Return the input for the Bergman Minimal Model in mU (milli-Units)"""
+
     return self.U_i*1000

@@ -14,21 +14,31 @@ class AggregatedMealModel(BaseEstimator, ClassifierMixin):
     to find best parameters for all models.
     """
 
-    def __init__(   self, horizon=40, x0=0, dx=0, g=.6, h=.01, dt=1.,
-                    meal_duration=30, meal_threshold=10):
+    def __init__    (self, horizon=45, data_frequency=5, x0=0, dx=0, g=.6,
+                    h=.01, dt=1., meal_duration=45, savgol_poly=1,
+                    savgol_len=15, calibration_time=3, std_mult=2,
+                    prediction_period=60):
+
         """Initialize aggregation class. All keyword arguments are passed
         along to each patient's individual MealPrediction Model.
 
-        Keywork arguments:
-        horizon -- How many timesteps to try predict glucose ahead of.
+        Keyword arguments:
+
+        horizon -- Prediction horizon for glucose values.
+        data_frequency -- The sample period of data that's fed to the model.
         x0 -- Is the initial guess for glucose in Gut compartment.
         dx -- Is the initial change rate for glucose rate of change.
-        g -- Is the g-h’s g scale factor
-        h -- Is the g-h’s h scale factor
+        g -- Is the g-h filter's g scale factor
+        h -- Is the g-h filter's h scale factor
         dt -- Is the length of the time step
-
-        meal_threshold -- Gradient threshold values to trigger meal on.
         meal_duration -- Duration for meal flag (default 15 min).
+        savgol_poly -- DoF for Savgol smoothing filter.
+        savgol_len -- Length of Savgol smoothing window.
+        calibration_time -- Gh filter will produce some ringing, allow cal time.
+        std_mult -- Meal prediction are based on the estimate glucose
+                consumption offset from mean in no. of std deviations.
+        prediction_period -- Time span after a meal where a prediction counts
+                as a true positive.
         """
 
         # Short hand for assigning all args to attributes with same name
@@ -60,7 +70,7 @@ class AggregatedMealModel(BaseEstimator, ClassifierMixin):
         return self
 
 
-    def score(self, X, y=None, mode='PPV', verbose=0):
+    def score(self, X, y=None, mode='TPR', verbose=0):
         """Score each individual MealPrediction model and return mean.
 
         Keyword arguments:

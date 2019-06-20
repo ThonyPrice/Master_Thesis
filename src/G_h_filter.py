@@ -1,7 +1,15 @@
 class G_h_filter(object):
-    """Class description"""
+    """Alpha beta (aka g-h) filter implementation
 
-    def __init__(self, x0, dx=0.1, g=.6, h=.01, dt=1.):
+    A-b filter is a simplified form of observer for estimation,
+    data smoothing and control applications.
+
+    Implementation inspiration:
+    https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/
+        master/01-g-h-filter.ipynb
+    """
+
+    def __init__(self, x0, dx=0.1, g=.001, h=.01, dt=1.):
         self.x = x0
         self.x0 = x0
         self.x_est = x0
@@ -25,7 +33,7 @@ class G_h_filter(object):
 
     def update(self, y, y_pred):
         # Update step
-        self.residual = (y-y_pred).mean()
+        self.residual = y[-1]-y_pred[-1]
         self.dx = self.dx + self.h * self.residual / self.dt
         self.x = self.x_est + self.g * self.residual
         self.x = max(0, self.x)
